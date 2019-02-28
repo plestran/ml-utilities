@@ -1,4 +1,3 @@
-# import packages
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -15,20 +14,8 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import roc_curve
 from sklearn.metrics import auc
 
-def plot_distribution(series):
-    ''' Plot data compared and compare it to a normal distribution '''
+#-----------------------------------------------------------------------------
 
-    # make sure it's a pandas Series
-    if not isinstance(series, pd.Series):
-        series = pd.Series(series)
-  
-    # print summary statistics
-    mu, sigma, skew = series.mean(), series.std(), series.skew()
-    print('mu = {:.2f}, sigma = {:.2f}, skew = {:.2f}'.format(mu, sigma, skew))
-    
-    # plot the distribution
-    sns.distplot(series, fit=stats.norm)
-    
 def hyperparam_search(base_clf, parameters, scores, X_train, X_test, y_train, 
                       y_test, strategy='grid'):
     ''' 
@@ -62,6 +49,8 @@ def hyperparam_search(base_clf, parameters, scores, X_train, X_test, y_train,
         clf = clf.best_estimator_.fit(X_train, y_train)
         
     return clf
+
+#-----------------------------------------------------------------------------
 
 def nested_cv(base_model, parameters, train_df, features, target, 
               strategy='grid'):
@@ -109,29 +98,7 @@ def nested_cv(base_model, parameters, train_df, features, target,
     
     return best_params
 
-def plot_roc(models, X_test, y_test):
-    ''' Plot ROC curves for multiple models '''
-   
-    # loop over all models in the dictionary models 
-    fig = plt.figure()
-    fig.set_size_inches(10, 8)
-    for name, clf in models.items():
-    
-        # get the fpr and tpr
-        fpr, tpr, _ = roc_curve(y_test, clf.predict_proba(X_test)[:,1])
-        roc_auc = auc(fpr, tpr)
-
-        # plot curves
-        plt.plot(fpr, tpr,lw=2, label='{:4.3f}: {}'.format(roc_auc, name))
-        plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
-
-    # format plot
-    plt.xlim([-.02, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate', fontsize=14)
-    plt.ylabel('True Positive Rate', fontsize=14)
-    plt.legend(loc="lower right", fontsize=20)
-    plt.show()
+#-----------------------------------------------------------------------------
 
 class LogisticRegression(LogisticRegression):
     '''
@@ -199,6 +166,9 @@ class LogisticRegression(LogisticRegression):
                     self.features[i], self.params[i], self.stderr[i], self.z_scores[i], self.p_values[i], \
                     self.conf_int[i][0], self.conf_int[i][1], str((self.p_values[i] < alpha))))
             
+
+#-----------------------------------------------------------------------------
+
 class Pipeline(Pipeline):
     '''
     Wrapper Class for sklearn's Pipeline so the summary can be printed
@@ -212,6 +182,8 @@ class Pipeline(Pipeline):
         if self._final_estimator is not None:
             self._final_estimator.summary(features)
             
+#-----------------------------------------------------------------------------
+
 class AveragingModels():
     ''' Average several models together '''
     def __init__(self, models):
@@ -237,3 +209,6 @@ class AveragingModels():
             model.predict_proba(X)[:,1] for model in self.models
         ])
         return np.mean(predictions, axis=1)
+
+#-----------------------------------------------------------------------------
+
